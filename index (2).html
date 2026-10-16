@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Lean Terminal</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#0e1011;--panel:#151819;--line:#272c2f;--tx:var(--tg-theme-text-color,#e6e8e9);--dim:var(--tg-theme-hint-color,#7d878c);--ac:var(--tg-theme-button-color,#d9a441);--act:var(--tg-theme-button-text-color,#111);--bad:#e0605a;--ok:#5cb98a;
+--ui:-apple-system,"Inter","Segoe UI",Roboto,sans-serif;--mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--tx);font:14px/1.4 var(--ui);overscroll-behavior:none}
+body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}
+main{flex:1;overflow-y:auto;padding:12px 12px 16px}
+.n,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.p{background:var(--panel);border:1px solid var(--line);border-radius:2px;margin-bottom:10px}
+.ph{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);color:var(--dim);font-size:12px;letter-spacing:.02em}
+.pb{padding:12px}
+.g4{display:grid;grid-template-columns:repeat(2,1fr)}
+.g4>div{padding:12px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.g4>div:nth-child(2n){border-right:0}.g4>div:nth-last-child(-n+2){border-bottom:0}
+.k{color:var(--dim);font-size:12px}.v{font:600 24px var(--mono);margin-top:2px}.v small{font-size:12px;color:var(--dim);font-weight:400}
+.bar{height:6px;background:#0a0c0d;border:1px solid var(--line);border-radius:1px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ac)}
+.bar.over i{background:var(--bad)}
+.row{display:flex;gap:8px;align-items:center}.row>*{min-width:0}.sp{justify-content:space-between}
+input,select,textarea{width:100%;background:#0a0c0d;color:var(--tx);border:1px solid var(--line);border-radius:2px;padding:9px 10px;font:14px var(--mono);outline:0}
+textarea{font-family:var(--ui);resize:none}
+input:focus,select:focus,textarea:focus{border-color:var(--ac)}
+label{display:block;color:var(--dim);font-size:12px;margin-bottom:4px}
+.f{margin-bottom:10px}.f2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button{font:600 13px var(--ui);border-radius:2px;border:1px solid var(--line);background:transparent;color:var(--tx);padding:9px 12px;cursor:pointer}
+button.pr{background:var(--ac);color:var(--act);border-color:var(--ac)}button.dg{color:var(--bad)}button:disabled{opacity:.5}
+button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+.chip{padding:6px 9px;font-weight:500;font-size:12px;white-space:nowrap}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.li{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line)}.li:last-child{border:0}
+.li .x{color:var(--dim);padding:2px 8px;border:0;font-size:16px}
+.tgd{--bg:var(--tg-theme-bg-color,#0e1011);--panel:var(--tg-theme-secondary-bg-color,#151819)}
+.dim{color:var(--dim)}.em{padding:18px 12px;color:var(--dim);text-align:center}
+nav{display:flex;border-top:1px solid var(--line);background:var(--panel);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;border:0;border-radius:0;color:var(--dim);display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0 8px;font-size:11px;font-weight:500;border-top:2px solid transparent;margin-top:-1px}
+nav button.on{color:var(--ac);border-top-color:var(--ac)}
+nav svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6}
+svg.ch text{font:10px var(--mono);fill:var(--dim)}
+.chat{display:flex;flex-direction:column;gap:8px}
+.m{max-width:88%;padding:8px 11px;border:1px solid var(--line);border-radius:2px;white-space:pre-wrap;word-wrap:break-word}
+.m.u{align-self:flex-end;background:var(--ac);color:var(--act);border-color:var(--ac)}.m.a{align-self:flex-start;background:var(--panel)}
+.cin{display:flex;gap:8px;padding:8px 12px;border-top:1px solid var(--line);background:var(--bg)}
+.cin textarea{height:40px}
+#toast{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top) + 10px);z-index:20;padding:10px 12px;background:var(--panel);border:1px solid var(--ac);border-left-width:4px;border-radius:2px;transform:translateY(-150%);transition:transform .2s}
+#toast.show{transform:none}#toast.err{border-color:var(--bad)}
+#ov{position:fixed;inset:0;z-index:10;background:rgba(5,6,7,.88);display:none;align-items:flex-end;justify-content:center}
+#ov.show{display:flex}#ov .p{width:100%;max-width:480px;max-height:92%;overflow-y:auto;margin:0;padding-bottom:env(safe-area-inset-bottom)}
+h2{font-size:15px;font-weight:600}a{color:var(--ac)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<div id="toast" role="status"></div><div id="ov"></div>
+<main id="app"></main>
+<nav id="nav"></nav>
+<script>
+const tg=window.Telegram&&Telegram.WebApp;
+if(tg){try{tg.ready();tg.expand();const bc=tg.colorScheme==='dark'&&tg.themeParams&&tg.themeParams.bg_color;if(bc)document.documentElement.classList.add('tgd');tg.setHeaderColor(bc||'#0e1011');tg.setBackgroundColor(bc||'#0e1011')}catch(e){}}
+const hap=(t='medium')=>{try{tg&&tg.HapticFeedback&&(['success','error','warning'].includes(t)?tg.HapticFeedback.notificationOccurred(t):tg.HapticFeedback.impactOccurred(t))}catch(e){}};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const KEY='lean_terminal_v1', MODEL='gemini-2.5-flash';
+const def={p:null,weights:[],food:[],chat:[],water:{},key:''};const clone=o=>JSON.parse(JSON.stringify(o));
+let S;try{S=Object.assign({},clone(def),JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){S=clone(def)}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Хранилище заполнено или заблокировано. Данные не сохранятся.',1)}};
+let tt;const toast=(m,err)=>{const t=$('#toast');t.textContent=m;t.className='show'+(err?' err':'');hap(err?'error':'success');clearTimeout(tt);tt=setTimeout(()=>t.className='',3200)};
+const day=(d=new Date())=>{const z=new Date(d);z.setMinutes(z.getMinutes()-z.getTimezoneOffset());return z.toISOString().slice(0,10)};
+const fmtD=s=>new Date(s+'T00:00').toLocaleDateString('ru-RU',{day:'2-digit',month:'short'});
+const r1=n=>Math.round(n*10)/10;
+const ACT=[['1.2','Минимальная: сидячая работа'],['1.375','Лёгкая: 1–3 тренировки в неделю'],['1.55','Средняя: 3–5 тренировок в неделю'],['1.725','Высокая: 6–7 тренировок в неделю']];
+function calc(p){const bmr=10*p.w+6.25*p.h-5*p.age+(p.sex==='m'?5:-161);const tdee=bmr*p.act;
+ const kcal=Math.max(p.sex==='m'?1500:1200,Math.round((tdee-(p.tw<p.w?500:p.tw>p.w?-300:0))/10)*10);
+ const pr=Math.round(1.8*p.w),f=Math.round(kcal*.25/9),c=Math.max(0,Math.round((kcal-pr*4-f*9)/4));return{kcal,pr,f,c}}
+const bmi=(w,h)=>w/((h/100)**2);
+const bmiCat=b=>b<18.5?'Дефицит':b<25?'Норма':b<30?'Избыток':'Ожирение';
+const todayFood=()=>S.food.filter(x=>x.d===day());
+const sum=a=>a.reduce((t,x)=>({kcal:t.kcal+x.kcal,p:t.p+x.p,f:t.f+x.f,c:t.c+x.c}),{kcal:0,p:0,f:0,c:0});
+const curW=()=>S.weights.length?S.weights[S.weights.length-1].w:S.p.w;
+
+/* ---------- profile form ---------- */
+function formHTML(p,withGoals){p=p||{w:'',tw:'',h:'',age:'',sex:'m',act:1.375};const g=S.p&&withGoals?S.p.goals||{}:{};
+return `<div class="f2"><div class="f"><label>Текущий вес, кг</label><input id="fw" type="number" inputmode="decimal" step="0.1" value="${p.w}"></div>
+<div class="f"><label>Целевой вес, кг</label><input id="ftw" type="number" inputmode="decimal" step="0.1" value="${p.tw}"></div>
+<div class="f"><label>Рост, см</label><input id="fh" type="number" inputmode="numeric" value="${p.h}"></div>
+<div class="f"><label>Возраст</label><input id="fa" type="number" inputmode="numeric" value="${p.age}"></div></div>
+<div class="f2"><div class="f"><label>Пол</label><select id="fs"><option value="m"${p.sex==='m'?' selected':''}>Мужской</option><option value="f"${p.sex==='f'?' selected':''}>Женский</option></select></div>
+<div class="f"><label>Активность</label><select id="fac">${ACT.map(a=>`<option value="${a[0]}"${+a[0]===+p.act?' selected':''}>${a[1]}</option>`).join('')}</select></div></div>
+${withGoals?`<div class="k" style="margin-bottom:6px">Дневные цели. Оставьте пустым для автоматического расчёта.</div><div class="f2" style="grid-template-columns:repeat(4,1fr)">
+${[['kcal','ккал'],['pr','Б, г'],['f','Ж, г'],['c','У, г']].map(([k,l])=>`<div class="f"><label>${l}</label><input id="g_${k}" type="number" inputmode="numeric" value="${g[k]||''}"></div>`).join('')}</div>`:''}`}
+function readForm(withGoals){const n=id=>parseFloat($('#'+id).value);
+ const p={w:n('fw'),tw:n('ftw'),h:n('fh'),age:n('fa'),sex:$('#fs').value,act:+$('#fac').value};
+ const bad=(m)=>{toast(m,1);return null};
+ if(!(p.w>=30&&p.w<=300))return bad('Текущий вес: от 30 до 300 кг.');
+ if(!(p.tw>=30&&p.tw<=300))return bad('Целевой вес: от 30 до 300 кг.');
+ if(!(p.h>=100&&p.h<=250))return bad('Рост: от 100 до 250 см.');
+ if(!(p.age>=14&&p.age<=100))return bad('Возраст: от 14 до 100 лет.');
+ if(withGoals){const g={};['kcal','pr','f','c'].forEach(k=>{const v=parseFloat($('#g_'+k).value);if(v>0)g[k]=Math.round(v)});p.goals=g}
+ return p}
+function applyProfile(p){const old=S.p;p.w0=old?old.w0:p.w;S.p=p;if(!old||old.w!==p.w){S.weights.push({d:day(),w:p.w});if(!old)S.p.w0=p.w}
+ if(old&&old.w!==p.w&&S.weights.length)S.p.w0=old.w0;save()}
+const goals=()=>{const a=calc({...S.p,w:curW()});const g=S.p.goals||{};return{kcal:g.kcal||a.kcal,pr:g.pr||a.pr,f:g.f||a.f,c:g.c||a.c}};
+
+function onboarding(){const o=$('#ov');o.className='show';
+ o.innerHTML=`<div class="p"><div class="ph"><h2>Настройка</h2><span>Один раз</span></div><div class="pb">${formHTML()}
+ <button class="pr" style="width:100%" id="ob">Рассчитать план</button></div></div>`;
+ $('#ob').onclick=()=>{const p=readForm(false);if(!p)return;p.w0=p.w;S.p=p;S.weights=[{d:day(),w:p.w}];save();o.className='';hap('success');render()}}
+
+/* ---------- views ---------- */
+let view='dash';
+const ICONS={dash:'<path d="M3 20V4M3 20h18M7 15l4-4 3 3 6-7"/>',food:'<path d="M6 3v8a2 2 0 0 0 2 2v8M10 3v8M6 7h4M17 3c-2 2-3 5-3 8h3v10"/>',coach:'<path d="M4 5h16v11H9l-5 4z"/>',set:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'};
+const LBL={dash:'Сводка',food:'Дневник',coach:'Коуч',set:'Настройки'};
+function nav(){$('#nav').innerHTML=Object.keys(ICONS).map(k=>`<button data-v="${k}" class="${view===k?'on':''}" aria-label="${LBL[k]}"><svg viewBox="0 0 24 24">${ICONS[k]}</svg>${LBL[k]}</button>`).join('');
+ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{if(view!==b.dataset.v){view=b.dataset.v;hap('light');render()}})}
+function render(){if(!S.p){onboarding();return}nav();const a=$('#app');a.style.padding='';({dash,food,coach,set}[view])(a);document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{view=b.dataset.go;hap('light');render()})}
+
+function chart(){const W=336,H=150,L=34,R=8,T=10,B=20;const pts=S.weights.slice(-30);if(pts.length<2)return`<div class="em">Добавьте минимум два взвешивания, чтобы увидеть тренд.</div>`;
+ const ws=pts.map(x=>x.w).concat(S.p.tw);let mn=Math.min(...ws)-1,mx=Math.max(...ws)+1;
+ const X=i=>L+i*(W-L-R)/(pts.length-1),Y=w=>T+(mx-w)*(H-T-B)/(mx-mn);
+ const grid=[mn,(mn+mx)/2,mx].map(v=>`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="#272c2f"/><text x="${L-4}" y="${Y(v)+3}" text-anchor="end">${r1(v)}</text>`).join('');
+ const line=pts.map((x,i)=>`${i?'L':'M'}${X(i)},${Y(x.w)}`).join('');
+ return`<svg class="ch" viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="График веса">${grid}
+ <line x1="${L}" x2="${W-R}" y1="${Y(S.p.tw)}" y2="${Y(S.p.tw)}" stroke="#5cb98a" stroke-dasharray="3 3"/>
+ <path d="${line}" fill="none" stroke="var(--ac)" stroke-width="1.6"/>
+ ${pts.map((x,i)=>`<circle cx="${X(i)}" cy="${Y(x.w)}" r="3" fill="#0e1011" stroke="var(--ac)" stroke-width="1.5" data-i="${i}" class="pt"/>`).join('')}
+ <text x="${L}" y="${H-5}">${fmtD(pts[0].d)}</text><text x="${W-R}" y="${H-5}" text-anchor="end">${fmtD(pts[pts.length-1].d)}</text>
+ <text id="tip" x="${W-R}" y="${T+2}" text-anchor="end" style="fill:var(--tx)"></text></svg>`}
+
+function dash(a){const w=curW(),p=S.p,tot=Math.abs(p.w0-p.tw)||1,done=p.tw<p.w0?p.w0-w:w-p.w0,left=p.tw<p.w0?w-p.tw:p.tw-w;
+ const pct=Math.max(0,Math.min(100,done/tot*100)),b=bmi(w,p.h);
+ a.innerHTML=`<div class="p"><div class="g4">
+ <div><div class="k">Сейчас</div><div class="v">${r1(w)}<small> кг</small></div></div>
+ <div><div class="k">Цель</div><div class="v">${r1(p.tw)}<small> кг</small></div></div>
+ <div><div class="k">ИМТ · ${bmiCat(b)}</div><div class="v">${b.toFixed(1)}</div></div>
+ <div><div class="k">Осталось</div><div class="v">${r1(Math.max(0,left))}<small> кг</small></div></div></div></div>
+ <div class="p"><div class="ph"><span>Прогресс к цели</span><span class="n">${pct.toFixed(0)}%</span></div><div class="pb">
+ <div class="bar"><i style="width:${pct}%"></i></div>
+ <div class="row sp n dim" style="margin-top:6px;font-size:12px"><span>${r1(p.w0)}</span><span>${done>=0?'−':'+'}${r1(Math.abs(done))} кг</span><span>${r1(p.tw)}</span></div></div></div>
+ <div class="p"><div class="ph"><span>Вода</span><span class="n">${waterToday()} / ${waterGoal()} мл</span></div><div class="pb"><div class="bar"><i style="width:${Math.min(100,waterToday()/waterGoal()*100)}%"></i></div>
+ <div class="row" style="margin-top:8px"><button data-w="-250" style="flex:1">−250</button><button class="pr" data-w="250" style="flex:1">+250</button><button data-w="500" style="flex:1">+500</button></div></div></div>
+ <div class="p"><div class="ph"><span>Динамика веса</span><span>Цель — пунктир</span></div><div class="pb" style="padding:6px">${chart()}</div></div>
+ <div class="p"><div class="ph"><span>Новое взвешивание</span></div><div class="pb row"><input id="nw" type="number" inputmode="decimal" step="0.1" placeholder="кг"><input id="nd" type="date" value="${day()}" max="${day()}"><button class="pr" id="aw">Добавить</button></div></div>
+ <div class="p"><div class="ph"><span>История</span><span class="n">${S.weights.length}</span></div>
+ ${S.weights.length?[...S.weights].map((x,i)=>({...x,i})).reverse().slice(0,30).map(x=>`<div class="li"><span class="n dim">${x.d}</span><span class="n">${r1(x.w)} кг</span><button class="x dg" data-del="${x.i}" aria-label="Удалить запись">×</button></div>`).join(''):'<div class="em">Записей пока нет.</div>'}</div>`;
+ document.querySelectorAll('.pt').forEach(c=>c.onclick=()=>{const x=pts30()[c.dataset.i];$('#tip').textContent=x.d+'  '+r1(x.w)+' кг';hap('light')});
+ document.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>addWater(+b.dataset.w));
+ $('#aw').onclick=()=>{const v=parseFloat($('#nw').value),d=$('#nd').value;if(!(v>=30&&v<=300))return toast('Введите вес от 30 до 300 кг.',1);if(!d||d>day())return toast('Выберите корректную дату.',1);
+  S.weights.push({d,w:v});S.weights.sort((x,y)=>x.d.localeCompare(y.d));save();hap('success');render()};
+ document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(S.weights.length<2)return toast('Нужно оставить хотя бы одно взвешивание.',1);S.weights.splice(+b.dataset.del,1);save();hap('warning');render()})}
+const pts30=()=>S.weights.slice(-30);
+const waterGoal=()=>Math.max(1500,Math.round(curW()*30/50)*50),waterToday=()=>(S.water||{})[day()]||0;
+const addWater=ml=>{S.water=S.water||{};S.water[day()]=Math.max(0,waterToday()+ml);save();hap('medium');render()};
+const banner=()=>S.key?'':`<div class="p" style="border-color:var(--bad)"><div class="pb row sp"><span>Нет API-ключа Gemini. ИИ-функции отключены.</span><button class="pr" data-go="set">Добавить</button></div></div>`;
+let busy=false;
+
+const QUICK=[['Яйцо',78,6,5,.6],['Куриная грудка 100 г',165,31,3.6,0],['Рис варёный 100 г',130,2.7,.3,28],['Банан',105,1.3,.4,27],['Греческий йогурт 150 г',90,15,1,6],['Овсянка 50 г',190,6.5,3.5,33]];
+function food(a){const t=sum(todayFood()),g=goals();
+ const mb=(l,v,gl)=>`<div style="margin-bottom:8px"><div class="row sp n" style="font-size:12px;margin-bottom:3px"><span class="dim">${l}</span><span>${Math.round(v)} / ${gl}</span></div><div class="bar${v>gl?' over':''}"><i style="width:${Math.min(100,v/gl*100)}%"></i></div></div>`;
+ a.innerHTML=`${banner()}<div class="p"><div class="ph"><span>Сегодня</span><span class="n">${Math.max(0,g.kcal-Math.round(t.kcal))} ккал осталось</span></div><div class="pb">
+ ${mb('Калории',t.kcal,g.kcal)}${mb('Белки, г',t.p,g.pr)}${mb('Жиры, г',t.f,g.f)}${mb('Углеводы, г',t.c,g.c)}</div></div>
+ <div class="p"><div class="ph"><span>Опишите приём пищи</span></div><div class="pb"><textarea id="ft" rows="2" placeholder="Съел 200 г куриной грудки с рисом"></textarea>
+ <button class="pr" id="fai" style="width:100%;margin-top:8px">Распознать и добавить</button></div></div>
+ <div class="p"><div class="ph"><span>Быстрое добавление</span></div><div class="pb"><div class="chips">${QUICK.map((q,i)=>`<button class="chip" data-q="${i}">${esc(q[0])}</button>`).join('')}</div></div></div>
+ <div class="p"><div class="ph"><span>Вручную</span></div><div class="pb"><div class="f"><input id="mn" placeholder="Название"></div>
+ <div class="f2" style="grid-template-columns:repeat(4,1fr)">${['kcal','P','F','C'].map(k=>`<input id="m_${k}" type="number" inputmode="decimal" placeholder="${({kcal:'ккал',P:'Б',F:'Ж',C:'У'})[k]}">`).join('')}</div>
+ <button id="ma" style="width:100%;margin-top:8px">Добавить запись</button></div></div>
+ <div class="p"><div class="ph"><span>Журнал</span><span class="n">${todayFood().length}</span></div>
+ ${todayFood().length?S.food.map((x,i)=>({...x,i})).filter(x=>x.d===day()).map(x=>`<div class="li"><div><div>${esc(x.name)}</div><div class="n dim" style="font-size:12px">Б ${r1(x.p)} · Ж ${r1(x.f)} · У ${r1(x.c)}</div></div><div class="row"><span class="n">${Math.round(x.kcal)}</span><button class="x dg" data-df="${x.i}" aria-label="Удалить">×</button></div></div>`).join(''):'<div class="em">Сегодня ничего не добавлено.</div>'}</div>`;
+ const add=(e)=>{S.food.push({d:day(),...e});save();hap('success');render()};
+ document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{const q=QUICK[b.dataset.q];add({name:q[0],kcal:q[1],p:q[2],f:q[3],c:q[4]})});
+ document.querySelectorAll('[data-df]').forEach(b=>b.onclick=()=>{S.food.splice(+b.dataset.df,1);save();hap('warning');render()});
+ $('#ma').onclick=()=>{const n=$('#mn').value.trim(),v=k=>parseFloat($('#m_'+k).value)||0;if(!n)return toast('Введите название.',1);if(!(v('kcal')>0&&v('kcal')<5000))return toast('Калории: от 1 до 5000.',1);
+  if(v('P')<0||v('F')<0||v('C')<0)return toast('БЖУ не могут быть отрицательными.',1);add({name:n,kcal:v('kcal'),p:v('P'),f:v('F'),c:v('C')})};
+ $('#fai').onclick=async()=>{const tx=$('#ft').value.trim();if(!tx)return toast('Опишите, что вы съели.',1);const b=$('#fai');b.disabled=true;b.textContent='Анализ…';
+  try{const out=await gem({contents:[{role:'user',parts:[{text:'Estimate nutrition for this meal, one item per distinct food: '+tx}]}],
+   systemInstruction:{parts:[{text:'You are a nutrition database. Return only a JSON array of objects {"name":string,"kcal":number,"p":number,"f":number,"c":number} (protein, fat, carbs in grams) for the portions described. Assume typical portions if none are given. Item names in Russian. No prose.'}]},
+   generationConfig:{responseMimeType:'application/json',temperature:.2}});
+   let arr=JSON.parse(out.replace(/```json|```/g,'').trim());if(!Array.isArray(arr))arr=[arr];
+   arr=arr.filter(x=>x&&x.name&&isFinite(x.kcal)).map(x=>({d:day(),name:String(x.name).slice(0,80),kcal:+x.kcal,p:+x.p||0,f:+x.f||0,c:+x.c||0}));
+   if(!arr.length)throw new Error('Продукты не распознаны. Опишите подробнее.');
+   S.food.push(...arr);save();hap('success');toast('Добавлено позиций: '+arr.length+' · '+Math.round(sum(arr).kcal)+' ккал');render()}
+  catch(e){toast(e instanceof SyntaxError?'Не удалось разобрать ответ ИИ. Попробуйте ещё раз.':e.message,1);b.disabled=false;b.textContent='Распознать и добавить'}}}
+
+/* ---------- Gemini ---------- */
+async function gem(body){if(!S.key)throw new Error('Нет API-ключа. Добавьте его в Настройках.');if(!navigator.onLine)throw new Error('Нет подключения к интернету.');
+ const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),30000);let r;
+ try{r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,{method:'POST',signal:ctl.signal,headers:{'Content-Type':'application/json','x-goog-api-key':S.key},body:JSON.stringify(body)})}
+ catch(e){throw new Error(e.name==='AbortError'?'Превышено время ожидания.':'Ошибка сети. Проверьте подключение.')}finally{clearTimeout(to)}
+ let j;try{j=await r.json()}catch(e){j={}}
+ if(!r.ok){const m=(j.error&&j.error.message)||'';throw new Error(r.status===400&&/API key/i.test(m)?'Неверный API-ключ.':r.status===429?'Лимит запросов. Подождите минуту и повторите.':r.status===403?'API-ключ отклонён или не имеет доступа.':'Ошибка ИИ '+r.status+(m?': '+m.slice(0,100):''))}
+ const t=j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts;if(!t)throw new Error('Пустой ответ ИИ (возможно, заблокирован). Переформулируйте запрос.');
+ return t.map(x=>x.text||'').join('')}
+async function gemStream(body,cb){if(!S.key)throw new Error('Нет API-ключа. Добавьте его в Настройках.');if(!navigator.onLine)throw new Error('Нет подключения к интернету.');
+ const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),60000);let full='';
+ try{const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:streamGenerateContent?alt=sse`,{method:'POST',signal:ctl.signal,headers:{'Content-Type':'application/json','x-goog-api-key':S.key},body:JSON.stringify(body)});
+  if(!r.ok){let j={};try{j=await r.json()}catch(e){}const m=(j.error&&j.error.message)||'';throw new Error(r.status===400&&/API key/i.test(m)?'Неверный API-ключ.':r.status===429?'Лимит запросов. Подождите минуту и повторите.':r.status===403?'API-ключ отклонён или не имеет доступа.':'Ошибка ИИ '+r.status+(m?': '+m.slice(0,100):''))}
+  const rd=r.body.getReader(),dec=new TextDecoder();let buf='';
+  for(;;){const {done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let i;
+   while((i=buf.indexOf('\n'))>=0){const line=buf.slice(0,i).trim();buf=buf.slice(i+1);if(!line.startsWith('data:'))continue;
+    try{const j=JSON.parse(line.slice(5));const ps=(j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts)||[];const t=ps.map(x=>x.text||'').join('');if(t){full+=t;cb(full)}}catch(e){}}}
+ }catch(e){if(e.name==='AbortError')throw new Error('Превышено время ожидания.');if(e instanceof TypeError)throw new Error('Ошибка сети. Проверьте подключение.');throw e}finally{clearTimeout(to)}
+ if(!full)throw new Error('Пустой ответ ИИ (возможно, заблокирован). Переформулируйте запрос.');return full}
+function sysPrompt(){const p=S.p,t=sum(todayFood()),g=goals(),w=curW();
+ return `Ты — персональный нутрициолог и коуч по снижению веса внутри Telegram-приложения. Отвечай по-русски, кратко, практично и на основе доказательной практики. Не ставь медицинских диагнозов, при медицинских вопросах советуй обратиться к врачу. Не рекомендуй калорийность ниже безопасного минимума.
+Данные пользователя: стартовый вес ${r1(p.w0)} кг; текущий вес ${r1(w)} кг; целевой вес ${r1(p.tw)} кг; рост ${p.h} см; возраст ${p.age}; пол ${p.sex==='m'?'мужской':'женский'}; ИМТ ${bmi(w,p.h).toFixed(1)}.
+Дневные цели: ${g.kcal} ккал, белки ${g.pr} г, жиры ${g.f} г, углеводы ${g.c} г.
+Съедено сегодня: ${Math.round(t.kcal)} ккал (Б ${Math.round(t.p)} г, Ж ${Math.round(t.f)} г, У ${Math.round(t.c)} г); осталось ${Math.round(g.kcal-t.kcal)} ккал.
+Приёмы пищи сегодня: ${todayFood().map(x=>x.name+' '+Math.round(x.kcal)+' ккал').join('; ')||'пока нет'}.`}
+
+function coach(a){a.style.padding='12px 12px 0';
+ a.innerHTML=`${banner()}<div class="chat" id="cl">${S.chat.length?S.chat.map(m=>`<div class="m ${m.r==='user'?'u':'a'}">${esc(m.t)}</div>`).join(''):`<div class="em">Спросите про план, питание или плато веса.${S.key?'':'<br>Сначала добавьте ключ Gemini в Настройках.'}</div>`}</div><div style="height:8px"></div>
+ <div class="cin" style="position:sticky;bottom:0;margin:0 -12px"><textarea id="ci" placeholder="Сообщение"></textarea><button class="pr" id="cs">Отправить</button></div>`;
+ a.scrollTop=a.scrollHeight;
+ const send=async()=>{const i=$('#ci'),tx=i.value.trim();if(!tx)return;if(!S.key)return toast('Нет API-ключа. Добавьте его в Настройках.',1);
+  if(busy)return;busy=true;let fail=false;S.chat.push({r:'user',t:tx});save();hap();coach(a);
+  const hist=S.chat.slice(-20).map(m=>({role:m.r==='user'?'user':'model',parts:[{text:m.t}]}));
+  const btn=$('#cs');btn.disabled=true;btn.textContent='…';
+  const el=document.createElement('div');el.className='m a';el.textContent='…';$('#cl').appendChild(el);a.scrollTop=a.scrollHeight;
+  try{const out=await gemStream({systemInstruction:{parts:[{text:sysPrompt()}]},contents:hist,generationConfig:{temperature:.7}},t=>{el.textContent=t;a.scrollTop=a.scrollHeight});
+   S.chat.push({r:'model',t:out.trim()});save();hap('success')}
+  catch(e){fail=true;toast(e.message,1);S.chat.pop();save()}
+  busy=false;if(view==='coach'){coach(a);if(fail)$('#ci').value=tx}};
+ $('#cs').onclick=send;$('#ci').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}}}
+
+function set(a){a.innerHTML=`<div class="p"><div class="ph"><span>Ключ Gemini API</span><span style="color:${S.key?'var(--ok)':'var(--bad)'}">${S.key?'Сохранён':'Нет'}</span></div><div class="pb">
+ <div class="dim" style="font-size:13px;margin-bottom:10px">Бесплатный ключ: откройте <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" id="lk">Google AI Studio</a>, войдите в аккаунт Google, нажмите Create API key и вставьте ключ сюда. Ключ хранится в localStorage на этом устройстве и отправляется только в Google.</div>
+ <div class="f"><input id="ak" type="password" autocomplete="off" placeholder="AIza…" value="${esc(S.key)}"></div><div class="row"><button class="pr" id="sk" style="flex:1">Сохранить ключ</button><button id="tk">Проверить</button></div></div></div>
+ <div class="p"><div class="ph"><span>Профиль и цели</span></div><div class="pb">${formHTML(S.p,true)}<button class="pr" id="sp" style="width:100%">Сохранить профиль</button></div></div>
+ <div class="p"><div class="ph"><span>Данные</span></div><div class="pb row"><button id="cc" style="flex:1">Очистить чат</button><button class="dg" id="rs" style="flex:1">Сбросить все данные</button></div><div class="pb" style="padding-top:0"><button class="dg" id="wipe" style="width:100%">Стереть всё локально, включая ключ</button></div></div>`;
+ $('#lk').onclick=e=>{if(tg&&tg.openLink){e.preventDefault();tg.openLink('https://aistudio.google.com/apikey')}};
+ $('#sk').onclick=()=>{const k=$('#ak').value.trim();if(k&&!/^[\w-]{20,}$/.test(k))return toast('Это не похоже на API-ключ.',1);S.key=k;save();toast(k?'API-ключ сохранён.':'API-ключ удалён.');render()};
+ $('#tk').onclick=async()=>{const k=$('#ak').value.trim();if(!k)return toast('Сначала вставьте ключ.',1);const old=S.key;S.key=k;const b=$('#tk');b.disabled=true;
+  try{await gem({contents:[{role:'user',parts:[{text:'Reply with OK'}]}]});toast('Ключ работает.')}catch(e){toast(e.message,1)}S.key=old;b.disabled=false};
+ $('#sp').onclick=()=>{const p=readForm(true);if(!p)return;const old=S.p;p.w0=old.w0;S.p=p;if(Math.abs(curW()-p.w)>1e-9){S.weights.push({d:day(),w:p.w});S.weights.sort((x,y)=>x.d.localeCompare(y.d))}
+  if(!Object.keys(p.goals).length)delete S.p.goals;save();toast('Профиль сохранён.');render()};
+ $('#wipe').onclick=()=>{const go=()=>{try{localStorage.removeItem(KEY)}catch(e){}location.reload()};tg&&tg.showConfirm?tg.showConfirm('Стереть всё локально, включая API-ключ?',ok=>ok&&go()):confirm('Стереть всё локально, включая API-ключ?')&&go()};
+ $('#cc').onclick=()=>{if(!S.chat.length)return toast('Чат уже пуст.',1);S.chat=[];save();hap('warning');toast('Чат очищен.')};
+ $('#rs').onclick=()=>{const go=()=>{S=Object.assign({},clone(def),{key:S.key});save();hap('warning');view='dash';render()};
+  tg&&tg.showConfirm?tg.showConfirm('Удалить профиль, вес, дневник и чат? API-ключ сохранится.',ok=>ok&&go()):confirm('Удалить все данные?')&&go()}}
+render();
+</script></body></html>
